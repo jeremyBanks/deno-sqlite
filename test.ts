@@ -5,7 +5,7 @@ import {
   assertThrows,
 } from "https://deno.land/std@0.53.0/testing/asserts.ts";
 import { createHash } from "https://deno.land/std@0.61.0/hash/mod.ts";
-import { DB, Empty, Status } from "./mod.ts";
+import { DB, Empty, SQL, Status } from "./mod.ts";
 import SqliteError from "./src/error.ts";
 
 // file used for fs io tests
@@ -795,4 +795,25 @@ Deno.test("json functions enabled", function () {
 
   const [[json_extract]] = db.query(`SELECT json_extract('{"a": 2.5}', '$.a')`);
   assertEquals(json_extract, 2.5);
+});
+
+Deno.test("SQL tagged template strings available", function () {
+  const db = new DB();
+
+  const [[result]] = db.query(SQL`SELECT 2`);
+  assertEquals(result, 2);
+});
+
+Deno.test("SQL tagged template strings support interpolated values", function () {
+  const db = new DB();
+
+  const [[result]] = db.query(SQL`SELECT ${4}`);
+  assertEquals(result, 4);
+});
+
+Deno.test("SQL tagged template strings can be nested", function () {
+  const db = new DB();
+
+  const [[result]] = db.query(SQL`${SQL`SELECT`} ${9}`);
+  assertEquals(result, 9);
 });

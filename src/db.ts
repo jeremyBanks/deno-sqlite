@@ -110,7 +110,17 @@ export class DB {
    * iterated over or discarded by calling
    * `.return()` or closing the iterator.
    */
-  query(sql: string, values?: object | QueryParam[]): Rows {
+  query(sql: string | TaggedSQL, values?: object | QueryParam[]): Rows {
+    if (sql instanceof TaggedSQL) {
+      if (values) {
+        throw new TypeError(
+          "TaggedSQL already includes values, but they were specified again.",
+        );
+      }
+      values = sql.values;
+      sql = sql.strings.join("?");
+    }
+
     if (!this._open) {
       throw new SqliteError("Database was closed.");
     }
@@ -289,3 +299,64 @@ export class DB {
     return new SqliteError(msg, code);
   }
 }
+
+class TaggedSQL {
+  constructor(
+    readonly strings: Readonly<string[]>,
+    readonly values: Readonly<QueryParam[]>,
+  ) {}
+}
+
+export const SQL = (
+  strings: TemplateStringsArray,
+  ...values: (QueryParam | TaggedSQL)[]
+): TaggedSQL => {
+  const flattened: (
+    | { string: string; value?: undefined }
+    | { value: QueryParam; string?: undefined }
+  )[] = [];
+
+  for (let i = 0; i < strings.length; i++) {
+    let string = strings[i];
+    flattened.push({ string });
+
+    if (i < values.length) {
+      let value = values[i];
+      if (value instanceof TaggedSQL) {
+        for (let j = 0; j < value.strings.length; j++) {
+          flattened.push({ string: value.strings[i] });
+
+          if (j < value.values.length) {
+            flattened.push({ value: value.values[j] });
+          }
+        }
+      } else {
+        flattened.push({ value });
+      }
+    }
+  }
+
+  let flattenedStrings = [];
+  let flattenedValues = [];
+  let stringBuffer: string | null = null;
+  for (const { string, value } of flattened) {
+    if (string !== undefined) {
+      stringBuffer = (stringBuffer || "") + string;
+    } else {
+      if (stringBuffer !== null) {
+        flattenedStrings.push(stringBuffer);
+        stringBuffer = null;
+      }
+      flattenedValues.push(value);
+    }
+  }
+
+  if (stringBuffer !== null) {
+    flattenedStrings.push(stringBuffer);
+  }
+
+  return new TaggedSQL(
+    Object.freeze(flattenedStrings),
+    Object.freeze(flattenedValues),
+  );
+};

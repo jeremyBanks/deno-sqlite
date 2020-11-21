@@ -820,3 +820,19 @@ Deno.test({
     db.close();
   },
 });
+
+Deno.test("sqliteTzMatchesJsTz", function () {
+  const db = new DB();
+
+  // XXX: This test's state depends on the local time zone on the test machine.
+  // XXX: The outcome shouldn't vary, but if something is failing, maybe it is.
+  const exampleTimestamp = 622614083;
+  const [adjustedTimestamp] = db.query(
+    `
+    SELECT CAST(strftime('%s', DATETIME(?, 'unixepoch', 'localtime')) AS INT)
+  `,
+    [exampleTimestamp],
+  );
+  const offset = adjustedTimestamp - exampleTimestamp;
+  assertEquals(offset / 60, new Date().getTimezoneOffset());
+});

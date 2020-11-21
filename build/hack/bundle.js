@@ -37,6 +37,7 @@ export default function instantiate() {
   placeholder.exports = instance.exports;
   instance.exports.seed_rng(Date.now());
   return instance;
-}`,
+}
+`,
   ),
 );

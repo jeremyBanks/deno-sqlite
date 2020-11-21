@@ -8,6 +8,9 @@ export default function env(inst) {
   // instead of resource ids.
   const files = new Map();
 
+  const hours = new Date().getTimezoneOffset() / 60;
+  const tz = hours < 0 ? `UTC${hours}` : hours > 0 ? `UTC+${hours}` : `UTC`;
+
   // Exported environment
   const env = {
     // Print a string pointer to console
@@ -98,6 +101,8 @@ export default function env(inst) {
       }
       return 1;
     },
+
+    TZ: tz,
   };
 
   return { env };

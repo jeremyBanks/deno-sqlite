@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <sqlite3.h>
 #include <pcg.h>
 #include "debug.h"
@@ -26,6 +28,17 @@ int EXPORT(str_len) (const char* str) {
 // get as many bytes from the JS number as possible.
 void EXPORT(seed_rng) (double seed) {
   pcg_seed((uint64_t)seed);
+}
+
+// Set the `TZ` environment variable to the provided UTC offset in hours.
+void EXPORT(set_tz_utc_offset) (double utcOffsetHours) {
+  char buffer[16] = "UTC";
+  if (utcOffsetHours > 0) {
+    snprintf(buffer, 16, "UTC+%lf", utcOffsetHours);
+  } else if (utcOffsetHours < 0) {
+    snprintf(buffer, 16, "UTC-%lf", fabs(utcOffsetHours));
+  }
+  setenv("TZ", buffer, 1);
 }
 
 // Return last status encountered.

@@ -820,3 +820,15 @@ Deno.test({
     db.close();
   },
 });
+
+Deno.test("sqliteTzMatchesJsTz", function () {
+  const db = new DB();
+
+  const exampleTimestamp = 622614083;
+  const [adjustedTimestamp] = db.query(
+    "SELECT CAST(strftime('%s', DATETIME(?, 'unixepoch', 'localtime')) AS INT)",
+    [exampleTimestamp],
+  );
+  const offsetMinutes = (adjustedTimestamp - exampleTimestamp) / 60;
+  assertEquals(offsetMinutes, new Date().getTimezoneOffset());
+});

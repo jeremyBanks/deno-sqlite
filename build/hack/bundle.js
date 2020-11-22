@@ -36,6 +36,7 @@ export default function instantiate() {
   const instance = new WebAssembly.Instance(module, env(placeholder));
   placeholder.exports = instance.exports;
   instance.exports.seed_rng(Date.now());
+  instance.exports.set_tz_utc_offset((new Date()).getTimezoneOffset() / 60);
   return instance;
 }`,
   ),

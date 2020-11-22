@@ -154,7 +154,7 @@ static int denoOpen(
   p->base.pMethods = &denoio;
 
   // TODO(dyedgreen): The current approach is to raise
-  // the permission error on the vfs.js side of things,
+  // the permission error on the vfs.ts side of things,
   // should the error be propagates through the wrapper
   // and be raised on the wrapper side of things?
   p->rid = js_open(zName, zName ? 0 : 1);

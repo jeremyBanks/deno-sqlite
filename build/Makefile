@@ -3,7 +3,7 @@ WASI ?= ./wasi-sdk
 CC    = $(WASI)/bin/clang
 
 OUT_WA = "sqlite.wasm"
-OUT_BN = "sqlite.js"
+OUT_BN = "sqlite.ts"
 
 SQLITE_DLD = "https://sqlite.org/2020/sqlite-src-3310100.zip"
 SQLITE_DIR = "sqlite-src-3310100"
@@ -54,11 +54,11 @@ SQLFLG = -DSQLITE_DQS=0 -DSQLITE_THREADSAFE=0 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS\
 all: release
 
 build:
-	$(DENO) run --allow-read --allow-write hack/gen_syms.js vfs.syms
+	$(DENO) run --allow-read --allow-write hack/gen_syms.ts vfs.syms
 	$(CC) $(WAFLG) $(FLGS) $(INCS) $(CSRC) $(SQLFLG) -o $(OUT_WA)
 
 bundle:
-	$(DENO) run --allow-read --allow-write hack/bundle.js $(OUT_WA) $(OUT_BN)
+	$(DENO) run --allow-read --allow-write hack/bundle.ts $(OUT_WA) $(OUT_BN)
 	$(DENO) fmt $(OUT_BN)
 
 debug: FLGS += $(DFLG)

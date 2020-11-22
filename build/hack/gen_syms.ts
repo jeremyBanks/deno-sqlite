@@ -1,7 +1,7 @@
 // Generate available import symbols
-// from vfs.js file
+// from vfs.ts file
 
-import env from "../vfs.js";
+import env from "../vfs.ts";
 
 let symbols = "";
 for (const symbol of Object.keys(env().env)) {

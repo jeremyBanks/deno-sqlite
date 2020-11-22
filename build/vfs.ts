@@ -2,7 +2,7 @@ import { getStr } from "../src/wasm.ts";
 
 // Closure to return an environment that links
 // the current wasm context
-export default function env(inst) {
+export default function env(inst?: any) {
   // Map file rids to file names, since
   // some of Deno's os methods use files-names
   // instead of resource ids.
@@ -14,13 +14,13 @@ export default function env(inst) {
   // Exported environment
   const env = {
     // Print a string pointer to console
-    js_print: (str_ptr) => {
+    js_print: (str_ptr: number) => {
       const text = getStr(inst.exports, str_ptr);
       console.log(text[text.length - 1] === "\n" ? text.slice(0, -1) : text);
     },
     // Open the file at path, mode = 0 is open RW, mode = 1 is open TEMP
-    js_open: (path_ptr, mode) => {
-      let path;
+    js_open: (path_ptr: number, mode: number) => {
+      let path: string;
       switch (mode) {
         case 0:
           path = getStr(inst.exports, path_ptr);
@@ -30,22 +30,22 @@ export default function env(inst) {
           break;
       }
       let rid =
-        Deno.openSync(path, { read: true, write: true, create: true }).rid;
-      files.set(rid, path);
+        Deno.openSync(path!, { read: true, write: true, create: true }).rid;
+      files.set(rid, path!);
       return rid;
     },
     // Close a file
-    js_close: (rid) => {
+    js_close: (rid: number) => {
       Deno.close(rid);
       files.delete(rid);
     },
     // Delete file at path
-    js_delete: (path_ptr) => {
+    js_delete: (path_ptr: number) => {
       let path = getStr(inst.exports, path_ptr);
       Deno.removeSync(path);
     },
     // Read from a file to a buffer in the module
-    js_read: (rid, buffer_ptr, offset, amount) => {
+    js_read: (rid: number, buffer_ptr: number, offset: number, amount: number) => {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
@@ -55,7 +55,7 @@ export default function env(inst) {
       return Deno.readSync(rid, buffer);
     },
     // Write to a file from a buffer in the module
-    js_write: (rid, buffer_ptr, offset, amount) => {
+    js_write: (rid: number, buffer_ptr: number, offset: number, amount: number) => {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
@@ -65,11 +65,11 @@ export default function env(inst) {
       return Deno.writeSync(rid, buffer);
     },
     // Truncate the given file
-    js_truncate: (rid, size) => {
+    js_truncate: (rid: number, size: number) => {
       Deno.truncateSync(files.get(rid), size);
     },
     // Retrieve the size of the given file
-    js_size: (rid) => {
+    js_size: (rid: number) => {
       return Deno.statSync(files.get(rid)).size;
     },
     // Return current time in ms since UNIX epoch
@@ -77,7 +77,7 @@ export default function env(inst) {
       return Date.now();
     },
     // Determine if a path exists
-    js_exists: (path_ptr) => {
+    js_exists: (path_ptr: number) => {
       const path = getStr(inst.exports, path_ptr);
       try {
         Deno.statSync(path);
@@ -90,7 +90,7 @@ export default function env(inst) {
     },
     // Determine if a path is accessible i.e. if it has read/write permissions
     // TODO(dyedgreen): Properly determine if there are read permissions
-    js_access: (path_ptr) => {
+    js_access: (path_ptr: number) => {
       const path = getStr(inst.exports, path_ptr);
       try {
         Deno.statSync(path);
@@ -101,8 +101,6 @@ export default function env(inst) {
       }
       return 1;
     },
-
-    TZ: tz,
   };
 
   return { env };

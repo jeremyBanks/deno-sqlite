@@ -1,4 +1,4 @@
-import instantiate from "../build/sqlite.js";
+import instantiate from "../build/sqlite.ts";
 import { getStr, setArr, setStr } from "./wasm.ts";
 import { Status, Values } from "./constants.ts";
 import SqliteError from "./error.ts";
@@ -249,7 +249,7 @@ export class DB {
    *
    * Get last inserted row id. This corresponds to
    * the SQLite function `sqlite3_last_insert_rowid`.
-   * 
+   *
    * By default, it will return 0 if there is no row
    * inserted yet.
    */

@@ -1,21 +1,22 @@
 # [x/sql-strings](https://deno.land/x/sql-strings)
 
-`SQLString` is a generic implementation of the `SQLRequest` interface from [`x/sql-interfaces`](https://deno.land/x/sql-interfaces) for SQL expressions with bound parameters, exposed as a <code>SQL&#96;SELECT Example…&#96;</code> string tag function.
+`SQLString` is a generic implementation of the `SQLRequest` interface from
+[`x/sql-interfaces`](https://deno.land/x/sql-interfaces) for SQL expressions
+with bound parameters, exposed as a <code>SQL&#96;SELECT Example…&#96;</code>
+string tag function.
 
-
-By default this will produces instances of `SQLRequest<AnyDialect>`, or a more specific `SQLDialect` may be specified explicitly.
+By default this will produces instances of `SQLRequest<AnyDialect>`, or a more
+specific `SQLDialect` may be specified explicitly.
 
 ```ts
 import {
-  SQLRequest,
-  SQLDialect,
   AnyDialect,
+  SQLDialect,
+  SQLRequest,
   UnknownDialect,
-} from 'https://deno.land/x/sql-interfaces/mod.ts';
+} from "https://deno.land/x/sql-interfaces/mod.ts";
 
-import {
-  SQL,
-} from 'https://deno.land/x/sql-strings/mod.ts';
+import { SQL } from "https://deno.land/x/sql-strings/mod.ts";
 
 const targetId = 2;
 
@@ -34,8 +35,11 @@ request.sql === `
   WHERE Id = ?
 `;
 result.parameters === [
-  2, 
+  2,
 ];
 ```
 
-Some drivers libraries may re-export the `SQL` tag function specialized for their dialect. For example, if you import `SQL` from `x/sqlite`, it will be produce strings of type `SQLRequest<sqlite.Dialect>` instead, which will be rejected as potentially incompatible by other drivers.
+Some drivers libraries may re-export the `SQL` tag function specialized for
+their dialect. For example, if you import `SQL` from `x/sqlite`, it will be
+produce strings of type `SQLRequest<sqlite.Dialect>` instead, which will be
+rejected as potentially incompatible by other drivers.

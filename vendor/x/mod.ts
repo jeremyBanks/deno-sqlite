@@ -6,50 +6,42 @@ type DefaultValueType = null | string | number | boolean;
 type DefaultRowType = Array<DefaultValueType>;
 
 export abstract class AsyncSqlConnection<
-  RowType=DefaultRowType,
-  ValueType=DefaultValueType,
-  Dialect=UnknownDialect,
+  RowType = DefaultRowType,
+  ValueType = DefaultValueType,
+  Dialect = UnknownDialect,
 > {
   abstract query(sql: Dialect): AsyncIterable<RowType>;
 }
 
-export abstract class SyncSqlConnection<
-  RowType=DefaultRowType,
-  ValueType=DefaultValueType,
-  Dialect=UnknownDialect,
-> extends AsyncSqlConnection<RowType, ValueType, Dialect> {
-  async *query(sql: Dialect): AsyncIterable<RowType> {
-      for (const row of this.querySync(sql)) {
-        yield row;
-      }
+export abstract class SyncSqlConnection<...> extends AsyncSqlConnection<...> {
+  async *query(sql: SQLRequest): AsyncIterable<RowType> {
+    for (const row of this.querySync(sql)) {
+      yield row;
+    }
   }
 
-  abstract querySync(sql: Dialect): Iterable<RowType>;
+  abstract querySync(sql: SQLRequest): Iterable<RowType>;
 }
 
-
-
 export type SQLDialect = {
-  name: string,
-  bindableTypes: unknown,
+  name: string;
+  bindableTypes: unknown;
 };
 
 export type UnknownDialect = SQLDialect & {
-  name: string,
-  bindable: string | boolean | number,
+  name: string;
+  bindable: string | boolean | number;
 };
 
 export type SQLiteDialect = SQLDialect & {
-  name: 'sqlite',
-  bindable: QueryParam,
+  name: "sqlite";
+  bindable: QueryParam;
 };
-
-
 
 /**
  * Encodes ("escapes") a string as a SQLite identifier in a SQLExpression.
  */
- export const encodeSqliteIdentifier = (
+export const encodeSqliteIdentifier = (
   identifier: string,
   opts: {
     allowWeird?: boolean;
@@ -260,18 +252,16 @@ export const encodeIdentifier = (
   return new SQLExpression([encoded]);
 };
 
-
-const tableUnknown = SQL`Users`;                         // is a SQLString<UnknownDialect>
+const tableUnknown = SQL`Users`; // is a SQLString<UnknownDialect>
 const queryUnknown = SQL`SELECT * FROM ${tableUnknown}`; // is a SQLString<UnknownDialect>
 
-const tableSqlite = SQL<SQLiteDialect>`Users`;          // is a SQLString<SQLiteDialect>
-const tableSqlite2 = sqlite.encodeIdentifier('Users');  // is a SQLString<SQLiteDialect>
-const querySqlite = SQL`SELECT * FROM ${tableSqlite}`;  // is a SQLString<SQLiteDialect> (inferred from interpolated value)
+const tableSqlite = SQL<SQLiteDialect>`Users`; // is a SQLString<SQLiteDialect>
+const tableSqlite2 = sqlite.encodeIdentifier("Users"); // is a SQLString<SQLiteDialect>
+const querySqlite = SQL`SELECT * FROM ${tableSqlite}`; // is a SQLString<SQLiteDialect> (inferred from interpolated value)
 
-const tableMySQL = SQL<MySQLDialect>`Users`;            // is a SQLString<MySQLDialect>
-const queryMySQL = SQL`SELECT * FROM ${tableMySQL}`;    // is a SQLString<MySQLDialect>
+const tableMySQL = SQL<MySQLDialect>`Users`; // is a SQLString<MySQLDialect>
+const queryMySQL = SQL`SELECT * FROM ${tableMySQL}`; // is a SQLString<MySQLDialect>
 
 // Mixing known-different dialects should produce a SQLString<never> type, or an error, or something.
-const queryIncoherent = SQL`SELECT * FROM ${tableMySQL} m JOIN ${tableSqlite} l ON m.Id = l.UserId`;
-
-
+const queryIncoherent = SQL
+  `SELECT * FROM ${tableMySQL} m JOIN ${tableSqlite} l ON m.Id = l.UserId`;

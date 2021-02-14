@@ -5,6 +5,11 @@ import {
   UnknownDialect,
 } from "./mod.ts";
 
+// a driver must have an Open method accepting a string that starts
+// with the dialect's name :big-brain:.
+//
+// the module itself is the Driver. I guess.
+
 type RowType<Dialect extends SqlDialect> = SqlDialect["driverRowType"];
 
 export interface Queryer<

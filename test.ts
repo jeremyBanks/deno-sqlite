@@ -625,6 +625,24 @@ Deno.test("insertReturning", function () {
   ]);
 });
 
+Deno.test("mathFunctions", function () {
+  const db = new DB();
+
+  assertEquals([
+    ...db.query(
+      `select
+        SIN(0) as zero,
+        CEIL(0.5) as one,
+        SQRT(4) as two,
+        TRUNC(PI()) as three,
+        LOG(2, 16) as four,
+        ACOS(5) as [null]`,
+    ).asObjects(),
+  ], [
+    { zero: 0, one: 1, two: 2, three: 3, four: 4, null: null },
+  ]);
+});
+
 Deno.test("getColumnsWithNames", function () {
   const db = new DB();
 

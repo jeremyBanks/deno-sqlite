@@ -17,9 +17,14 @@ jobs:
       run: |
         export DENO_INSTALL="/home/runner/.deno"
         export PATH="$DENO_INSTALL/bin:$PATH"
-        sudo apt-get -y install --no-install-recommends tclsh gcc
+        sudo apt-get -y install --no-install-recommends tclsh gcc brotli
         cd build
         make setup amalgamation release
+        gzip < sqlite.js > sqlite.js.gz
+        brotli < sqlite.js > sqlite.js.br
+        gzip < sqlite.wasm > sqlite.wasm.gz
+        brotli < sqlite.wasm > sqlite.wasm.br
+        ls -l sqlite.*
     - uses: stefanzweifel/git-auto-commit-action@v2.5.0
       with:
         commit_message: (GitHub Action) Rebuild SQLite WASM
